@@ -1,10 +1,41 @@
 import React, { useState } from "react";
-import Home from "./Home";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [activeTab, setActiveTab] = useState("login");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  const handleSignup = (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    const confirmPassword = e.target.confirmPassword.value;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    const userData = { email, password };
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    alert("Signup successful! Please login.");
+    setActiveTab("login");
+  };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    if (storedUser && storedUser.email === email && storedUser.password === password) {
+      navigate("/home");
+    } else {
+      alert("Invalid credentials. Please try again.");
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-black to-purple-200">
@@ -36,13 +67,14 @@ export default function Login() {
         </div>
 
         {activeTab === "login" ? (
-          <form>
+          <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 Email Address
               </label>
               <input
                 type="email"
+                name="email"
                 placeholder="Email Address"
                 className="w-full p-2 border rounded-lg"
               />
@@ -53,6 +85,7 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="Password"
                 className="w-full p-2 border rounded-lg"
               />
@@ -62,7 +95,7 @@ export default function Login() {
                 Forgot password?
               </a>
             </div>
-            <button onClick={()=>{navigate("/home")}} className="w-full py-2 bg-blue-500 text-white rounded-lg">
+            <button type="submit" className="w-full py-2 bg-blue-500 text-white rounded-lg">
               Login
             </button>
             <p className="text-center text-sm mt-4">
@@ -77,13 +110,14 @@ export default function Login() {
             </p>
           </form>
         ) : (
-          <form>
+          <form onSubmit={handleSignup}>
             <div className="mb-4">
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 Email Address
               </label>
               <input
                 type="email"
+                name="email"
                 placeholder="Email Address"
                 className="w-full p-2 border rounded-lg"
               />
@@ -94,6 +128,7 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="Password"
                 className="w-full p-2 border rounded-lg"
               />
@@ -104,11 +139,12 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                name="confirmPassword"
                 placeholder="Confirm Password"
                 className="w-full p-2 border rounded-lg"
               />
             </div>
-            <button className="w-full py-2 bg-blue-500 text-white rounded-lg">
+            <button type="submit" className="w-full py-2 bg-blue-500 text-white rounded-lg">
               Signup
             </button>
           </form>
