@@ -1,11 +1,75 @@
 import { useNavigate } from "react-router-dom";
 import { LogOut, GraduationCap, Users, Calendar, CreditCard, BookOpen, AlertTriangle, PartyPopper } from 'lucide-react';
+import { Bar } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Home() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     navigate("/");
+  };
+
+  const attendanceData = [
+    { subject: "EM3", present: 18, total: 20 },
+    { subject: "DSA", present: 12, total: 15 },
+    { subject: "PPL", present: 18, total: 18 },
+    { subject: "MP", present: 11, total: 21 },
+    { subject: "SE", present: 2, total: 10 },
+    { subject: "DSA-lab", present: 6, total: 6 },
+    { subject: "MP-lab", present: 8, total: 9 },
+    { subject: "PBL-lab", present: 4, total: 4 }
+  ];
+
+  const attendancePercentages = attendanceData.map(item => 
+    item.total === 0 ? 0 : Math.round((item.present / item.total) * 100)
+  );
+
+  const barGraphData = {
+    labels: attendanceData.map(item => item.subject), // Subjects on x-axis
+    datasets: [
+      {
+        label: "Attendance Percentage",
+        data: attendancePercentages, // Attendance percentages on y-axis
+        backgroundColor: attendancePercentages.map(percentage => 
+          percentage >= 75 ? "rgba(75, 192, 192, 0.6)" : "rgba(255, 99, 132, 0.6)"
+        ),
+        borderColor: attendancePercentages.map(percentage => 
+          percentage >= 75 ? "rgba(75, 192, 192, 1)" : "rgba(255, 99, 132, 1)"
+        ),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  // Bar graph options
+  const barGraphOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 100,
+        title: {
+          display: true,
+          text: "Attendance Percentage (%)",
+        },
+      },
+      x: {
+        title: {
+          display: true,
+          text: "Subjects",
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
   };
 
   return (
@@ -38,7 +102,7 @@ export default function Home() {
               <p className="text-gray-600">View your academic performance</p>
             </div>
           </div>
-          
+
           {/* Attendance Card */}
           <div className="bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 col-span-full lg:col-span-2">
             <div className="p-6">
@@ -46,42 +110,8 @@ export default function Home() {
                 <h2 className="text-xl font-semibold text-gray-800">Attendance</h2>
                 <Calendar className="h-6 w-6 text-blue-500" />
               </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Subject</th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Present</th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Attendance %</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {[
-                      { subject: "EM3", present: 20, total: 20 },
-                      { subject: "DSA", present: 15, total: 12 },
-                      { subject: "PPL", present: 18, total: 18 },
-                      { subject: "MP", present: 21, total: 21 },
-                      { subject: "SE", present: 10, total: 0 },
-                      { subject: "DSA-lab", present: 6, total: 6 },
-                      { subject: "MP-lab", present: 10, total: 9 },
-                      { subject: "PBL-lab", present: 5, total: 4 }
-                    ].map((item, index) => (
-                      <tr key={index} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.subject}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">{item.present}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">{item.total}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center text-sm">
-                          <span className={`px-2 py-1 rounded-full ${
-                            (item.present/item.total * 100) >= 75 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {item.total === 0 ? 0 : Math.round(item.present/item.total * 100)}%
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="h-96">
+                <Bar data={barGraphData} options={barGraphOptions} />
               </div>
             </div>
           </div>
