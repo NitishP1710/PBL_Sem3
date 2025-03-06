@@ -55,8 +55,6 @@ app.post("/login", (req, res) => {
 
   const query = `SELECT name FROM user WHERE username = '${username}' AND password = '${password}'`;
 
-  console.log("Executing Query:", query); // Debugging (exposes queries)
-
   db.get(query, (err, row) => {
     if (err) {
       console.error("Error executing login query:", err);
