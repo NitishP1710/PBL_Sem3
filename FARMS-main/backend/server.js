@@ -6,7 +6,12 @@ const cors = require("cors");
 const app = express();
 const db = new sqlite3.Database("./users.db");
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -17,27 +22,50 @@ app.post("/signup", (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  const query = `INSERT INTO user (username, password, name) VALUES ('${username}', '${password}', '${name}')`;
+  const checkQuery = `SELECT * FROM user WHERE username = '${username}'`;
 
-  db.run(query, function (err) {
+  db.get(checkQuery, (err, row) => {
     if (err) {
-      return res.status(400).json({ error: "User already exists or database error" });
+      console.error("Error checking username:", err);
+      return res.status(500).json({ error: "Database error" });
     }
-    res.json({ message: "Signup Successful!" });
+
+    if (row) {
+      return res.status(400).json({ error: "Username already exists" });
+    }
+
+    const insertQuery = `INSERT INTO user (username, password, name) VALUES ('${username}', '${password}', '${name}')`;
+
+    db.run(insertQuery, function (err) {
+      if (err) {
+        console.error("Error inserting user:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      res.json({ message: "Signup Successful!" });
+    });
   });
 });
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username and password are required" });
+  }
+
   const query = `SELECT name FROM user WHERE username = '${username}' AND password = '${password}'`;
 
-  console.log("Executing Query:", query);
+  console.log("Executing Query:", query); // Debugging (exposes queries)
 
   db.get(query, (err, row) => {
-    if (err) return res.status(500).json({ error: "Internal Server Error" });
+    if (err) {
+      console.error("Error executing login query:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
 
-    if (!row) return res.status(401).json({ error: "Invalid credentials" });
+    if (!row) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     res.json({ message: `Hello, ${row.name}` });
   });
@@ -45,5 +73,5 @@ app.post("/login", (req, res) => {
 
 const PORT = 5007;
 app.listen(PORT, () => {
-  console.log(`🚨 VULNERABLE SERVER RUNNING ON: http://localhost:${PORT}`);
+  console.log(`SERVER RUNNING ON: http://localhost:${PORT}`);
 });
