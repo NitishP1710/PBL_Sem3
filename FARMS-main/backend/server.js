@@ -1,10 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
+const routes=require("./Routes/route")
 const cors = require("cors");
 
 const app = express();
 const db = new sqlite3.Database("./users.db");
+app.use("/api/v1",routes);
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -111,7 +113,9 @@ app.get("/feedback", (req, res) => {
   });
 });
 
-const PORT = 5007;
+const PORT = process.env.PORT || 5007;
 app.listen(PORT, () => {
-  console.log(`SERVER RUNNING ON: http://localhost:${PORT}`);
+  console.log(`🚨 VULNERABLE SERVER RUNNING ON: http://localhost:${PORT}`);
 });
+const dbConnect=require("./Config/database");
+dbConnect();
