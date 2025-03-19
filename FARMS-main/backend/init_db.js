@@ -1,25 +1,18 @@
 const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
 
+// Connect to the database (or create it if it doesn't exist)
 const db = new sqlite3.Database('./users.db');
 
-db.serialize(() => {
-  // Create the users table if it doesn't exist
-  db.run(`CREATE TABLE IF NOT EXISTS user (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE,
-    password TEXT,
-    name TEXT
-  )`);
+// Read the SQL file
+const sql = fs.readFileSync('database.sql').toString();
 
-  // Insert sample users
-  db.run(`INSERT INTO user (username, password, name) VALUES 
-    ('admin', 'admin123', 'App Administrator'),
-    ('deepak', 'mypassword', 'Deepak Patil'),
-    ('testuser', 'testpass', 'Test User')
-  `, (err) => {
-    if (err) console.log("Users already exist or error inserting:", err);
-    else console.log("Users inserted successfully");
-  });
+// Execute the SQL commands
+db.exec(sql, (err) => {
+    if (err) {
+        console.error('Error executing SQL file:', err);
+    } else {
+        console.log('Database setup complete!');
+    }
+    db.close();
 });
-
-db.close();

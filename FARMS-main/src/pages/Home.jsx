@@ -1,14 +1,37 @@
+import React, { useState } from "react";
 import Navbar from '../components/Navbar';
 import AttendanceChart from '../components/AttendanceChart';
-import FeedbackForm from '../components/FeedbackForm';
 import Card from '../components/Card';
 import SubjectList from '../components/SubjectList';
 import BacklogSubjects from '../components/BacklogSubjects';
 import EventsList from '../components/EventsList';
-import Footer from '../components/Footer'; 
+import Footer from '../components/Footer';
 import { Users, Calendar, CreditCard } from 'lucide-react';
 
 export default function Home() {
+  const [feedbackList, setFeedbackList] = useState([]);
+  const [showFeedback, setShowFeedback] = useState(false); // State to control visibility
+
+  // Function to fetch feedback
+  const fetchFeedback = async () => {
+    try {
+      const res = await fetch("http://localhost:5007/feedback");
+      const data = await res.json();
+      setFeedbackList(data);
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+    }
+  };
+
+  // Function to handle click on the feedback section
+  const handleFeedbackClick = async () => {
+    if (!showFeedback) {
+      // Fetch feedback only if it's not already shown
+      await fetchFeedback();
+    }
+    setShowFeedback(!showFeedback); // Toggle visibility
+  };
+
   const attendanceData = [
     { subject: "EM3", present: 18, total: 20 },
     { subject: "DSA", present: 12, total: 15 },
@@ -39,12 +62,30 @@ export default function Home() {
           <SubjectList />
           <BacklogSubjects />
           <EventsList />
-          <div className="bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+          <div
+            className="bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 cursor-pointer"
+            onClick={handleFeedbackClick} // Click handler
+          >
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">Feedback</h2>
               </div>
-              <FeedbackForm />
+              {/* Feedback List */}
+              {showFeedback && ( // Only show feedback if `showFeedback` is true
+                <div className="space-y-4">
+                  {feedbackList.length === 0 ? (
+                    <p className="text-gray-600">No feedback submitted yet.</p>
+                  ) : (
+                    feedbackList.map((item, index) => (
+                      <div
+                        key={index}
+                        className="p-4 border border-gray-200 rounded-lg bg-gray-50"
+                        dangerouslySetInnerHTML={{ __html: item.feedback }} // 🚨 Vulnerable to XSS
+                      />
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
