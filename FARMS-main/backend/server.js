@@ -69,6 +69,48 @@ app.post("/login", (req, res) => {
   });
 });
 
+// Create the feedback table if it doesn't exist
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS feedback (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      email TEXT,
+      feedback TEXT
+    )
+  `);
+});
+
+// POST /feedback - Save feedback to the database
+app.post("/feedback", (req, res) => {
+  const { name, email, feedback } = req.body;
+
+  if (!name || !email || !feedback) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const query = `INSERT INTO feedback (name, email, feedback) VALUES (?, ?, ?)`;
+  db.run(query, [name, email, feedback], function (err) {
+    if (err) {
+      console.error("Error saving feedback:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json({ message: "Feedback submitted successfully!" });
+  });
+});
+
+// GET /feedback - Retrieve all feedback from the database
+app.get("/feedback", (req, res) => {
+  const query = `SELECT * FROM feedback`;
+  db.all(query, (err, rows) => {
+    if (err) {
+      console.error("Error fetching feedback:", err);
+      return res.status(500).json({ error: "Database error" });
+    }
+    res.json(rows);
+  });
+});
+
 const PORT = 5007;
 app.listen(PORT, () => {
   console.log(`SERVER RUNNING ON: http://localhost:${PORT}`);
