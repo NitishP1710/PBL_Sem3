@@ -1,22 +1,33 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
-const routes=require("./Routes/route")
+const routes = require("./Routes/route");
 const cors = require("cors");
+const connectDatabase = require("./Config/database");
 
 const app = express();
 const db = new sqlite3.Database("./users.db");
-app.use("/api/v1",routes);
 
+// Middleware
 app.use(cors({
-  origin: "http://localhost:5173",
-  methods: ["GET", "POST"],
+  origin: "http://localhost:5173", // Replace with your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Database Connection (MongoDB)
+connectDatabase();
+
+// Routes
+app.use("/api/v1", routes);
+
+// Teacher Dashboard Routes
+const teacherRoutes = require("./routes/teacherRoutes");
+app.use("/api/v1/teacher", teacherRoutes);
+
+// Vulnerable Signup Route (SQL Injection)
 app.post("/signup", (req, res) => {
   const { username, password, name } = req.body;
 
@@ -24,6 +35,7 @@ app.post("/signup", (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
+  // Vulnerable SQL Query (concatenates user input directly)
   const checkQuery = `SELECT * FROM user WHERE username = '${username}'`;
 
   db.get(checkQuery, (err, row) => {
@@ -36,6 +48,7 @@ app.post("/signup", (req, res) => {
       return res.status(400).json({ error: "Username already exists" });
     }
 
+    // Vulnerable SQL Query (concatenates user input directly)
     const insertQuery = `INSERT INTO user (username, password, name) VALUES ('${username}', '${password}', '${name}')`;
 
     db.run(insertQuery, function (err) {
@@ -48,6 +61,7 @@ app.post("/signup", (req, res) => {
   });
 });
 
+// Vulnerable Login Route (SQL Injection)
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -55,6 +69,7 @@ app.post("/login", (req, res) => {
     return res.status(400).json({ error: "Username and password are required" });
   }
 
+  // Vulnerable SQL Query (concatenates user input directly)
   const query = `SELECT name FROM user WHERE username = '${username}' AND password = '${password}'`;
 
   db.get(query, (err, row) => {
@@ -71,7 +86,7 @@ app.post("/login", (req, res) => {
   });
 });
 
-// Create the feedback table if it doesn't exist
+// Feedback Table Creation
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS feedback (
@@ -83,7 +98,7 @@ db.serialize(() => {
   `);
 });
 
-// POST /feedback - Save feedback to the database
+// Submit Feedback Route
 app.post("/feedback", (req, res) => {
   const { name, email, feedback } = req.body;
 
@@ -101,7 +116,7 @@ app.post("/feedback", (req, res) => {
   });
 });
 
-// GET /feedback - Retrieve all feedback from the database
+// Fetch Feedback Route
 app.get("/feedback", (req, res) => {
   const query = `SELECT * FROM feedback`;
   db.all(query, (err, rows) => {
@@ -113,9 +128,8 @@ app.get("/feedback", (req, res) => {
   });
 });
 
+// Start Server
 const PORT = process.env.PORT || 5007;
 app.listen(PORT, () => {
-  console.log(`🚨 VULNERABLE SERVER RUNNING ON: http://localhost:${PORT}`);
+  console.log(`🚀 VULNERABLE SERVER RUNNING ON: http://localhost:${PORT}`);
 });
-const dbConnect=require("./Config/database");
-dbConnect();

@@ -1,31 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
-    name: {
-        type: String, // Corrected case
-        required: true, // Corrected spelling
-        maxLength: 100
-    },
-    rollNumber: {
-        type: String, 
-        required: true,
-        maxLength: 5
-    },
-    email: {
-        type: String, 
-        required: true, 
-        maxLength: 100
-    },
-    contactNumber: {
-        type: String, 
-        required: true, 
-        maxLength: 10
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now 
-    }
+  rollNumber: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  className: { type: String, required: true },
+  division: { type: String, required: true },
+  address: { type: String, required: true },
+  phone: { type: String, required: true },
 });
 
-// Export the model
-module.exports = mongoose.model('Student', studentSchema);
+module.exports = mongoose.model("Student", studentSchema);
