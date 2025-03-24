@@ -5,6 +5,7 @@ import TeacherDashboard from "./components/TeacherDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import Navbar from "./components/Navbar"; // Import Navbar
 import Footer from "./components/Footer"; // Import Footer
+import { BsHSquare } from "react-icons/bs";
 
 export default function App() {
   const [userType, setUserType] = useState(null); // null, 'teacher', or 'student'
