@@ -9,6 +9,8 @@ export default function Login({ setUserType }) {
     const username = e.target.username.value;
     const password = e.target.password.value;
 
+    console.log("Teacher Login Attempt:", { username, password }); // Add this line
+
     if (username === "admin" && password === "admin123") {
       setUserType("teacher");
       navigate("/teacherdashboard", { state: { userType: "teacher" } });
