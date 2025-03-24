@@ -25,7 +25,7 @@ export default function Login({ setUserType }) {
     const password = e.target.password.value;
 
     try {
-      const res = await fetch("http://localhost:5007/login", {
+      const res = await fetch("http://localhost:5008/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password, userType: "student" }),

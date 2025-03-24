@@ -56,6 +56,10 @@ function Navbar({ userType = "teacher", searchQuery, setSearchQuery }) {
     navigate("/exam-results");
   };
 
+  const handleAttendance = () => {
+    navigate("/attendance");
+  };
+
   return (
     <div>
       <nav className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 flex justify-between items-center shadow-lg">
@@ -116,37 +120,47 @@ function Navbar({ userType = "teacher", searchQuery, setSearchQuery }) {
                 <Calendar className="h-4 w-4" />
                 <span>Update Attendance</span>
               </button>
-              <button
-                onClick={handleFeesStatus}
-                className="w-full flex items-center space-x-2 bg-purple-500 text-white py-1.5 px-3 rounded-md hover:bg-purple-600 transition-all duration-300 text-sm"
-              >
-                <CreditCard className="h-4 w-4" />
-                <span>Fees Status</span>
-              </button>
-              <button
-                onClick={handleSchedule}
-                className="w-full flex items-center space-x-2 bg-indigo-500 text-white py-1.5 px-3 rounded-md hover:bg-indigo-600 transition-all duration-300 text-sm"
-              >
-                <Clock className="h-4 w-4" />
-                <span>Schedule</span>
-              </button>
-              <button
-                onClick={handleResults}
-                className="w-full flex items-center space-x-2 bg-pink-500 text-white py-1.5 px-3 rounded-md hover:bg-pink-600 transition-all duration-300 text-sm"
-              >
-                <BarChart className="h-4 w-4" />
-                <span>Results</span>
-              </button>
             </>
           ) : (
-            <button
-              onClick={handleFeedback}
-              className="w-full flex items-center space-x-2 bg-blue-500 text-white py-1.5 px-3 rounded-md hover:bg-blue-600 transition-all duration-300 text-sm"
-            >
-              <MessageSquare className="h-4 w-4" />
-              <span>Send Feedback</span>
-            </button>
+            <>
+              <button
+                onClick={handleAttendance}
+                className="w-full flex items-center space-x-2 bg-yellow-500 text-white py-1.5 px-3 rounded-md hover:bg-yellow-600 transition-all duration-300 text-sm"
+              >
+                <Calendar className="h-4 w-4" />
+                <span>Attendance</span>
+              </button>
+              <button
+                onClick={handleFeedback}
+                className="w-full flex items-center space-x-2 bg-blue-500 text-white py-1.5 px-3 rounded-md hover:bg-blue-600 transition-all duration-300 text-sm"
+              >
+                <MessageSquare className="h-4 w-4" />
+                <span>Send Feedback</span>
+              </button>
+            </>
           )}
+
+          <button
+            onClick={handleFeesStatus}
+            className="w-full flex items-center space-x-2 bg-purple-500 text-white py-1.5 px-3 rounded-md hover:bg-purple-600 transition-all duration-300 text-sm"
+          >
+            <CreditCard className="h-4 w-4" />
+            <span>Fees Status</span>
+          </button>
+          <button
+            onClick={handleSchedule}
+            className="w-full flex items-center space-x-2 bg-indigo-500 text-white py-1.5 px-3 rounded-md hover:bg-indigo-600 transition-all duration-300 text-sm"
+          >
+            <Clock className="h-4 w-4" />
+            <span>Schedule</span>
+          </button>
+          <button
+            onClick={handleResults}
+            className="w-full flex items-center space-x-2 bg-pink-500 text-white py-1.5 px-3 rounded-md hover:bg-pink-600 transition-all duration-300 text-sm"
+          >
+            <BarChart className="h-4 w-4" />
+            <span>Results</span>
+          </button>
 
           <button
             onClick={handleLogout}
