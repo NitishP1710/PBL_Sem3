@@ -1,22 +1,26 @@
-const student = require("../models/student");
 
+const student = require("../models/student");
 exports.createStudent = async (req, res) => {
   try {
-    const { name, rollNumber, email, contactNumber } = req.body;
+    const { name, rollNumber, email, contactNumber, className, division, address } = req.body;
+
     const response = await student.create({
       name,
       rollNumber,
       email,
-      contactNumber,
+      phone: contactNumber, // Map `contactNumber` to `phone`
+      className,
+      division,
+      address
     });
+
     res.status(200).json({
       success: true,
       data: response,
-      message: "Entry created succesfull",
+      message: "Entry created successfully",
     });
   } catch (e) {
     console.error(e);
-    console.log(e);
     res.status(500).json({
       success: false,
       data: "Internal server problem",
@@ -24,3 +28,21 @@ exports.createStudent = async (req, res) => {
     });
   }
 };
+exports.getStudents=async(req,res)=>{
+  try{
+    const response=await student.find();
+    res.status(200).json({
+      success:true,
+      data:response,
+      message:"data fetched successfully"
+    })
+  }
+  catch(e){
+    console.error(e);
+    res.status(500).json({
+      success:false,
+      data:"Internal server problem",
+      message:e.message
+    })
+  }
+}

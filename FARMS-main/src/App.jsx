@@ -1,14 +1,21 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./pages/Login";
 import TeacherDashboard from "./components/TeacherDashboard";
 import StudentDashboard from "./components/StudentDashboard";
 import Navbar from "./components/Navbar"; // Import Navbar
 import Footer from "./components/Footer"; // Import Footer
-import { BsHSquare } from "react-icons/bs";
 
 export default function App() {
-  const [userType, setUserType] = useState(null); // null, 'teacher', or 'student'
+  const [userType, setUserType] = useState(localStorage.getItem('userType')); // Initialize from localStorage
+
+  useEffect(() => {
+    if (userType) {
+      localStorage.setItem('userType', userType);
+    } else {
+      localStorage.removeItem('userType');
+    }
+  }, [userType]);
 
   return (
     <Router>
@@ -17,7 +24,7 @@ export default function App() {
         {/* Navbar (visible on all routes except login) */}
         <Routes>
           <Route path="/login" element={null} /> {/* Hide Navbar on login */}
-          <Route path="*" element={userType ? <Navbar /> : null} /> {/* Show Navbar on all other routes */}
+          <Route path="*" element={userType ? <Navbar userType={userType} /> : null} /> {/* Show Navbar on all other routes */}
         </Routes>
 
         {/* Main content area */}

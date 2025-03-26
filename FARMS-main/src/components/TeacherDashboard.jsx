@@ -1,129 +1,267 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
 
 const TeacherDashboard = () => {
   const [students, setStudents] = useState([]);
   const [attendanceData, setAttendanceData] = useState({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
-  // Fetch students from the API
   const fetchStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:5007/api/students");
-      setStudents(res.data);
-      setLoading(false);
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+      
+      const res = await axios.get("http://localhost:5008/api/v1/getStudents");
+      console.log("API Response:", res.data); // Debugging log
 
-      // Initialize attendanceData with 'present' as default
+      if (!res.data) {
+        throw new Error("Server returned empty response");
+      }
+
+      // Handle different response formats
+      let studentsArray = [];
+
+      // Case 1: Direct array response
+      if (Array.isArray(res.data)) {
+        studentsArray = res.data;
+      }
+      // Case 2: Object with nested students array
+      else if (res.data.students && Array.isArray(res.data.students)) {
+        studentsArray = res.data.students;
+      }
+      // Case 3: Object with student properties
+      else if (typeof res.data === 'object' && res.data !== null) {
+        studentsArray = Object.values(res.data).filter(
+          item => item && typeof item === 'object' && item.rollNumber
+        );
+      }
+
+      // Validate student records
+      const validStudents = studentsArray.filter(student => 
+        student?.rollNumber && student?.name
+      ).map(student => ({
+        rollNumber: String(student.rollNumber),
+        name: String(student.name)
+      }));
+
+      if (validStudents.length === 0) {
+        throw new Error("Response contained no valid student records");
+      }
+
+      setStudents(validStudents);
+
+      // Initialize attendance data with default 'present' status
       const initialAttendance = {};
-      res.data.forEach((student) => {
-        initialAttendance[student.rollNumber] = "present"; // Default status
+      validStudents.forEach(student => {
+        initialAttendance[student.rollNumber] = "present";
       });
       setAttendanceData(initialAttendance);
+
     } catch (error) {
-      console.error("Error fetching students:", error);
-      alert("Failed to fetch students. Please try again.");
+      console.error("Fetch error:", error);
+      setError(error.response?.data?.message || 
+               error.message || 
+               "Failed to fetch student data");
+      setStudents([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStudents(); // Load student list on component mount
+    fetchStudents();
   }, []);
 
-  // Handle attendance status change for a student
   const handleAttendanceChange = (rollNumber, status) => {
-    setAttendanceData((prevData) => ({
-      ...prevData,
-      [rollNumber]: status,
+    setAttendanceData(prev => ({
+      ...prev,
+      [rollNumber]: status
     }));
   };
 
-  // Submit attendance
   const submitAttendance = async () => {
+    if (submitting || students.length === 0) return;
+    
     setSubmitting(true);
-    const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
-
-    const attendanceArray = students.map((student) => ({
-      rollNumber: student.rollNumber,
-      status: attendanceData[student.rollNumber], // Updated status
-      date: today,
-    }));
+    setError(null);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     try {
+      const attendanceRecords = students.map(student => ({
+        rollNumber: student.rollNumber,
+        date: today,
+        status: attendanceData[student.rollNumber] || "present"
+      }));
+
       const res = await axios.post(
-        "http://localhost:5007/api/attendance",
-        { attendanceData: attendanceArray }
+        "http://localhost:5008/api/attendance/mark",
+        attendanceRecords
       );
-      alert(res.data.message); // Show success message
+
+      setSuccess(res.data.message || "Attendance submitted successfully!");
+      setTimeout(() => setSuccess(null), 5000); // Auto-dismiss success message
     } catch (error) {
-      console.error("Error updating attendance:", error);
-      alert("Error updating attendance. Please try again.");
+      console.error("Submission error:", error);
+      setError(error.response?.data?.message || 
+               error.message || 
+               "Failed to submit attendance");
     } finally {
       setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <p className="text-center mt-8">Loading students...</p>;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <RefreshCw className="animate-spin h-12 w-12 text-blue-500 mb-4" />
+        <p className="text-lg">Loading student data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+          <div className="flex flex-col items-center text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+            <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
+            <p className="mb-6">{error}</p>
+            <div className="flex gap-4">
+              <button
+                onClick={fetchStudents}
+                className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (students.length === 0) {
+    return (
+      <div className="container mx-auto p-8">
+        <div className="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+          <div className="flex flex-col items-center text-center">
+            <AlertCircle className="h-12 w-12 text-yellow-500 mb-4" />
+            <h2 className="text-xl font-bold mb-2">No Students Found</h2>
+            <p className="mb-6">The student list is currently empty.</p>
+            <button
+              onClick={fetchStudents}
+              className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh List
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Teacher Dashboard</h1>
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <table className="w-full border-collapse border border-gray-200">
-          <thead>
-            <tr className="bg-gray-100">
-              <th scope="col" className="p-3 text-left">Roll No</th>
-              <th scope="col" className="p-3 text-left">Name</th>
-              <th scope="col" className="p-3 text-center">Attendance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student) => (
-              <tr key={student.rollNumber} className="border-b">
-                <td className="p-3">{student.rollNumber}</td>
-                <td className="p-3">{student.name}</td>
-                <td className="p-3 text-center">
-                  <button
-                    aria-label="Mark as present"
-                    className={`mr-2 px-3 py-1 rounded-md ${
-                      attendanceData[student.rollNumber] === "present"
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-200"
-                    }`}
-                    onClick={() =>
-                      handleAttendanceChange(student.rollNumber, "present")
-                    }
-                  >
-                    <CheckCircle className="h-5 w-5 inline" /> Present
-                  </button>
-                  <button
-                    aria-label="Mark as absent"
-                    className={`px-3 py-1 rounded-md ${
-                      attendanceData[student.rollNumber] === "absent"
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-200"
-                    }`}
-                    onClick={() =>
-                      handleAttendanceChange(student.rollNumber, "absent")
-                    }
-                  >
-                    <XCircle className="h-5 w-5 inline" /> Absent
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container mx-auto p-4 md:p-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Teacher Dashboard</h1>
         <button
-          onClick={submitAttendance}
-          disabled={submitting}
-          className="mt-6 bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-300 disabled:bg-blue-300"
+          onClick={fetchStudents}
+          className="flex items-center gap-2 text-sm bg-gray-100 px-3 py-1 rounded hover:bg-gray-200"
         >
-          {submitting ? "Submitting..." : "Submit Attendance"}
+          <RefreshCw className="h-4 w-4" />
+          Refresh
         </button>
+      </div>
+
+      {success && (
+        <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-lg">
+          {success}
+        </div>
+      )}
+
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Roll No
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Attendance
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {students.map((student) => (
+                <tr key={student.rollNumber}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {student.rollNumber}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {student.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        onClick={() => handleAttendanceChange(student.rollNumber, "present")}
+                        className={`flex items-center px-3 py-1 rounded-md ${
+                          attendanceData[student.rollNumber] === "present"
+                            ? "bg-green-500 text-white"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Present
+                      </button>
+                      <button
+                        onClick={() => handleAttendanceChange(student.rollNumber, "absent")}
+                        className={`flex items-center px-3 py-1 rounded-md ${
+                          attendanceData[student.rollNumber] === "absent"
+                            ? "bg-red-500 text-white"
+                            : "bg-gray-100 hover:bg-gray-200"
+                        }`}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Absent
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="px-6 py-4 bg-gray-50 flex justify-end">
+          <button
+            onClick={submitAttendance}
+            disabled={submitting}
+            className={`flex items-center px-6 py-2 rounded-md text-white ${
+              submitting ? "bg-blue-400" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            {submitting ? (
+              <>
+                <RefreshCw className="animate-spin h-4 w-4 mr-2" />
+                Submitting...
+              </>
+            ) : (
+              "Submit Attendance"
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
