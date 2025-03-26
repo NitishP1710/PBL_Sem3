@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
+import Navbar from "./Navbar";
 
 const TeacherDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -23,28 +24,11 @@ const TeacherDashboard = () => {
         throw new Error("Server returned empty response");
       }
 
-      // Handle different response formats
-      let studentsArray = [];
-
-      // Case 1: Direct array response
-      if (Array.isArray(res.data)) {
-        studentsArray = res.data;
-      }
-      // Case 2: Object with nested students array
-      else if (res.data.students && Array.isArray(res.data.students)) {
-        studentsArray = res.data.students;
-      }
-      // Case 3: Object with student properties
-      else if (typeof res.data === 'object' && res.data !== null) {
-        studentsArray = Object.values(res.data).filter(
-          item => item && typeof item === 'object' && item.rollNumber
-        );
-      }
+      // Extract students from the response
+      const studentsArray = res.data.data || [];
 
       // Validate student records
-      const validStudents = studentsArray.filter(student => 
-        student?.rollNumber && student?.name
-      ).map(student => ({
+      const validStudents = studentsArray.map(student => ({
         rollNumber: String(student.rollNumber),
         name: String(student.name)
       }));
@@ -169,6 +153,8 @@ const TeacherDashboard = () => {
   }
 
   return (
+    <div>
+      <Navbar/>
     <div className="container mx-auto p-4 md:p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Teacher Dashboard</h1>
@@ -263,6 +249,7 @@ const TeacherDashboard = () => {
           </button>
         </div>
       </div>
+    </div>
     </div>
   );
 };

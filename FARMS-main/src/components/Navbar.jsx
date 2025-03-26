@@ -27,33 +27,82 @@ function Navbar({ userType, searchQuery, setSearchQuery }) {
     navigate(userRole === 'teacher' ? '/teacherDashboard' : '/studentDashboard');
   };
 
-  // Role-based handlers
-  const handleFeedback = () => navigate("/feedback");
-  const handleAddStudent = () => navigate("/add-student");
-  const handleMarkAttendance = () => navigate("/mark-attendance");
-  const handleViewAttendance = () => navigate("/attendance");
-  const handleFeesStatus = () => navigate("/fees-status");
+  // Role-based handlers with event prevention
+  const handleFeedback = (e) => {
+    e?.preventDefault();
+    navigate(userRole === 'teacher' ? '/feedback' : '/feedback');
+  };
+
+  const handleAddStudent = (e) => {
+    e?.preventDefault();
+    navigate("/add-student");
+  };
+
+  const handleMarkAttendance = (e) => {
+    e?.preventDefault();
+    navigate("/mark-attendance");
+  };
+
+  const handleViewAttendance = (e) => {
+    e?.preventDefault();
+    navigate("/attendance");
+  };
+
+  const handleFeesStatus = (e) => {
+    e?.preventDefault();
+    navigate("/fees-status");
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchQuery);
   };
 
-  // Teacher menu items
+  // Teacher menu items with proper click handlers
   const teacherMenuItems = [
-    { label: "Add Student", icon: <UserPlus size={16} />, action: handleAddStudent, color: "bg-green-500 hover:bg-green-600" },
-    { label: "Mark Attendance", icon: <Calendar size={16} />, action: handleMarkAttendance, color: "bg-yellow-500 hover:bg-yellow-600" },
-    { label: "See Feedback", icon: <BookOpenCheck size={16} />, action: handleFeedback, color: "bg-blue-500 hover:bg-blue-600" },
-    { label: "Fee Status", icon: <CreditCard size={16} />, action: handleFeesStatus, color: "bg-purple-500 hover:bg-purple-600" }
+    { 
+      label: "Add Student", 
+      icon: <UserPlus size={16} />, 
+      action: (e) => handleAddStudent(e),
+      color: "bg-green-500 hover:bg-green-600" 
+    },
+    { 
+      label: "Mark Attendance", 
+      icon: <Calendar size={16} />, 
+      action: (e) => handleMarkAttendance(e),
+      color: "bg-yellow-500 hover:bg-yellow-600" 
+    },
+    { 
+      label: "See Feedback", 
+      icon: <BookOpenCheck size={16} />, 
+      action: (e) => handleFeedback(e),
+      color: "bg-blue-500 hover:bg-blue-600" 
+    },
+    { 
+      label: "Fee Status", 
+      icon: <CreditCard size={16} />, 
+      action: (e) => handleFeesStatus(e),
+      color: "bg-purple-500 hover:bg-purple-600" 
+    }
   ];
 
-  // Student menu items
+  // Student menu items with proper click handlers
   const studentMenuItems = [
-    { label: "Attendance", icon: <ClipboardList size={16} />, action: handleViewAttendance, color: "bg-yellow-500 hover:bg-yellow-600" },
-    { label: "Send Feedback", icon: <MessageSquare size={16} />, action: handleFeedback, color: "bg-blue-500 hover:bg-blue-600" }
+    { 
+      label: "Attendance", 
+      icon: <ClipboardList size={16} />, 
+      action: (e) => handleViewAttendance(e),
+      color: "bg-yellow-500 hover:bg-yellow-600" 
+    },
+    { 
+      label: "Send Feedback", 
+      icon: <MessageSquare size={16} />, 
+      action: (e) => handleFeedback(e),
+      color: "bg-blue-500 hover:bg-blue-600" 
+    }
   ];
 
-  if (!userRole) return null; // Don't render until role is determined
+  if (!userRole) return null;
 
   return (
     <div className="sticky top-0 z-50">
@@ -84,7 +133,10 @@ function Navbar({ userType, searchQuery, setSearchQuery }) {
 
         {/* Mobile Menu Button */}
         <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }}
           className="p-1 rounded-md hover:bg-blue-500 transition-all"
           aria-label="Toggle menu"
         >
@@ -94,11 +146,19 @@ function Navbar({ userType, searchQuery, setSearchQuery }) {
 
       {/* Dropdown Menu */}
       {isMenuOpen && (
-        <div className="fixed right-0 top-16 bg-blue-700 text-white p-3 space-y-2 w-56 shadow-xl z-50">
+        <div 
+          className="fixed right-0 top-16 bg-blue-700 text-white p-3 space-y-2 w-56 shadow-xl z-50"
+          onClick={(e) => e.stopPropagation()} // Prevent event bubbling
+        >
           {(userRole === 'teacher' ? teacherMenuItems : studentMenuItems).map((item, index) => (
             <button
               key={index}
-              onClick={() => { item.action(); setIsMenuOpen(false); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                item.action(e);
+                setIsMenuOpen(false);
+              }}
               className={`w-full flex items-center space-x-2 ${item.color} text-white py-2 px-3 rounded-md transition-all text-sm`}
             >
               {item.icon}
@@ -106,7 +166,11 @@ function Navbar({ userType, searchQuery, setSearchQuery }) {
             </button>
           ))}
           <button
-            onClick={handleLogout}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleLogout();
+            }}
             className="w-full flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-md transition-all text-sm"
           >
             <LogOut size={16} />
