@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const connectDatabase = require("./Config/database");
+const http = require("http");
 const route=require("./Routes/route");
 
 const app = express();
@@ -50,6 +51,52 @@ db.serialize(() => {
 });
 
 // ================ VULNERABLE AUTH ROUTES ================ //
+
+// Home end point
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
+
+const fetch = require("node-fetch");
+// SSRF vulnerable endpoint
+app.get("/ssrf-test", async (req, res) => {
+
+  const { url } = req.query;
+
+  if (!url) {
+    return res.status(400).json({ error: "URL is required" });
+  }
+
+  try {
+    const targetUrl = new URL(url);
+
+    // Bypass restrictions for internal services
+    if (targetUrl.hostname === "localhost" || targetUrl.hostname === "127.0.0.1") {
+      console.log("Attempting localhost access:", url);
+    }
+
+    const protocol = targetUrl.protocol === "https:" ? https : http;
+
+    protocol.get(url, (response) => {
+      let data = "";
+
+      response.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      response.on("end", () => {
+        res.send(data);
+      });
+    }).on("error", (error) => {
+      console.error("SSRF Request Failed:", error);
+      res.status(500).json({ error: "Request failed" });
+    });
+
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    res.status(400).json({ error: "Invalid URL" });
+  }
+});
 
 // Vulnerable Signup Route (SQL Injection)
 app.post("/signup", (req, res) => {
