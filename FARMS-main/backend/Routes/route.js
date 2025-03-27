@@ -8,6 +8,8 @@ router.get("/students",getStudents);
 
 const {controlAttendance}=require("../controllers/attendanceController");
 router.post("/attendance",controlAttendance);
+const {getFeedback}=require("../controllers/feedbackController");
+router.post("/feedback",getFeedback);
 // const { 
 //   createStudent,
 //   getStudents,

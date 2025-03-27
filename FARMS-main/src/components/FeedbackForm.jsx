@@ -10,7 +10,7 @@ export default function FeedbackForm() {
 
     try {
       // Send feedback to the backend
-      const res = await fetch("http://localhost:5008/feedback", {
+      const res = await fetch("http://localhost:5008/api/v1/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, feedback }),
