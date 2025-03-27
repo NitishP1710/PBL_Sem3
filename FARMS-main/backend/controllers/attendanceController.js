@@ -1,13 +1,13 @@
-const Attendance = require("../models/attendance");
-const Student = require("../models/student");
-
 // Mark Attendance
+const Student = require("../models/student");
+const Attendance = require("../models/attendance");
+
 exports.controlAttendance = async (req, res) => {
     try {
-        const { name, date, status } = req.body;
+        const { rollNumber, date, status } = req.body;
 
-        // Find the student by name
-        const student = await Student.findOne({ name });
+        // Find the student by rollNumber
+        const student = await Student.findOne({ rollNumber });
         if (!student) {
             return res.status(404).json({
                 success: false,
@@ -17,7 +17,7 @@ exports.controlAttendance = async (req, res) => {
 
         // Check if attendance is already marked for the date
         const existingAttendance = await Attendance.findOne({
-            studentId: student._id,
+            rollNumber,
             date: new Date(date)
         });
 
@@ -30,7 +30,7 @@ exports.controlAttendance = async (req, res) => {
 
         // Create and save attendance
         const attendance = new Attendance({
-            studentId: student._id,
+            rollNumber,  // Ensure rollNumber is passed
             date: new Date(date),
             status
         });

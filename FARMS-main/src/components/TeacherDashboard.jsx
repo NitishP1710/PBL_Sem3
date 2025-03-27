@@ -17,7 +17,7 @@ const TeacherDashboard = () => {
       setError(null);
       setSuccess(null);
       
-      const res = await axios.get("http://localhost:5008/api/v1/getStudents");
+      const res = await axios.get("http://localhost:5008/api/v1/students");
       console.log("API Response:", res.data); // Debugging log
 
       if (!res.data) {
@@ -70,34 +70,37 @@ const TeacherDashboard = () => {
 
   const submitAttendance = async () => {
     if (submitting || students.length === 0) return;
-    
+
     setSubmitting(true);
     setError(null);
+    setSuccess(null);
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     try {
-      const attendanceRecords = students.map(student => ({
-        rollNumber: student.rollNumber,
-        date: today,
-        status: attendanceData[student.rollNumber] || "present"
-      }));
+        const attendanceRecords = students.map(student => ({
+            rollNumber: student.rollNumber,
+            date: today,
+            status: attendanceData[student.rollNumber] || "present"
+        }));
 
-      const res = await axios.post(
-        "http://localhost:5008/api/attendance/mark",
-        attendanceRecords
-      );
+        console.log("Attendance Records:", attendanceRecords); // Debugging log
 
-      setSuccess(res.data.message || "Attendance submitted successfully!");
-      setTimeout(() => setSuccess(null), 5000); // Auto-dismiss success message
+        // Loop through each record and send individual requests
+        for (const record of attendanceRecords) {
+          console.log("Sending record:", record); // Debugging log
+            await axios.post("http://localhost:5008/api/v1/attendance", record);
+        }
+
+        setSuccess("Attendance submitted successfully!");
+        setTimeout(() => setSuccess(null), 5000); // Auto-dismiss success message
     } catch (error) {
-      console.error("Submission error:", error);
-      setError(error.response?.data?.message || 
-               error.message || 
-               "Failed to submit attendance");
+        console.error("Submission error:", error);
+        setError(error.response?.data?.message || error.message || "Failed to submit attendance");
     } finally {
-      setSubmitting(false);
+        setSubmitting(false);
     }
-  };
+};
+
 
   if (loading) {
     return (

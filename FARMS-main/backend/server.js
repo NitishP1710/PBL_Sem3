@@ -3,9 +3,11 @@ const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3").verbose();
 const cors = require("cors");
 const connectDatabase = require("./Config/database");
+const route=require("./Routes/route");
 
 const app = express();
 const db = new sqlite3.Database("./users.db");
+
 
 // Middleware
 app.use(cors({
@@ -18,6 +20,7 @@ app.use(bodyParser.json());
 
 // Database Connection (MongoDB)
 connectDatabase();
+app.use("/api/v1",route)
 
 // Initialize tables
 db.serialize(() => {
@@ -43,29 +46,7 @@ db.serialize(() => {
     )
   `);
   
-  // Attendance table (vulnerable version)
-  db.run(`
-    CREATE TABLE IF NOT EXISTS attendance (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      student_id INTEGER,
-      date TEXT,
-      status TEXT
-    )
-  `);
   
-  // Students table (vulnerable version)
-  db.run(`
-    CREATE TABLE IF NOT EXISTS students (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      rollNumber TEXT,
-      name TEXT,
-      email TEXT,
-      className TEXT,
-      division TEXT,
-      address TEXT,
-      phone TEXT
-    )
-  `);
 });
 
 // ================ VULNERABLE AUTH ROUTES ================ //
