@@ -130,13 +130,13 @@ export default function Home() {
           />
 
           {/* Mark Attendance Button */}
-          <button
+          {/* <button
             onClick={() => navigate("/mark-attendance")}
             className="flex items-center justify-center space-x-2 text-2xl bg-white shadow-lg text-black  py-3 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105"
           >
             <Calendar className="h-5 w-5 text-blue-500" />
             <span>Mark Attendance</span><br/>
-          </button>
+          </button> */}
 
           {/* Other Components */}
           <SubjectList />

@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS user (
 
 -- Insert sample users
 INSERT INTO user (username, password, name) VALUES
-    ('admin', 'admin123', 'App Administrator'),
-    ('deepak', 'mypassword', 'Deepak Patil'),
-    ('testuser', 'testpass', 'Test User');
+    ('admin', 'admin123', 'teacher'),
+    ('deepak', 'mypassword', 'student'),
+    ('testuser', 'testpass', 'student');

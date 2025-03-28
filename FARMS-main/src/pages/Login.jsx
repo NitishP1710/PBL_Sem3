@@ -11,8 +11,9 @@ export default function Login({ setUserType }) {
     e.preventDefault();
     const username = e.target.username.value;
     const password = e.target.password.value;
+    const role=e.target.role.value;
 
-    if (username === "admin" && password === "admin123") {
+    if (role==="teacher") {
       // Store authentication data
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userType", "teacher");
@@ -114,6 +115,19 @@ export default function Login({ setUserType }) {
                         whileFocus={{ scale: 1.01 }}
                       />
                     </div>
+                    <div className="mb-6">
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Role
+                      </label>
+                      <motion.input
+                        type="text"
+                        name="role"
+                        placeholder="teacher/student"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        required
+                        whileFocus={{ scale: 1.01 }}
+                      />
+                    </div>
                     <motion.button
                       type="submit"
                       className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg hover:from-purple-700 hover:to-blue-600 transition-all"
@@ -162,6 +176,19 @@ export default function Login({ setUserType }) {
                         type="password"
                         name="password"
                         placeholder="Password"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        required
+                        whileFocus={{ scale: 1.01 }}
+                      />
+                    </div>
+                    <div className="mb-6">
+                      <label className="block mb-2 text-sm font-medium text-gray-700">
+                        Role
+                      </label>
+                      <motion.input
+                        type="text"
+                        name="role"
+                        placeholder="student/teacher"
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         required
                         whileFocus={{ scale: 1.01 }}

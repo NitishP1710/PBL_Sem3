@@ -51,3 +51,24 @@ exports.controlAttendance = async (req, res) => {
         });
     }
 };
+exports.getAttendance = async (req, res) => {
+    try {
+        const { rollNumber,date } = req.body;
+
+        
+        const attendance = await Attendance.find({ rollNumber ,date});
+
+        res.status(200).json({
+            success: true,
+            data: attendance,
+            message: "Attendance fetched successfully"
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching attendance",
+            error: err.message
+        });
+    }
+}

@@ -6,8 +6,9 @@ const router = express.Router();
 const {getStudents}=require("../controllers/studentcontroller");
 router.get("/students",getStudents);
 
-const {controlAttendance}=require("../controllers/attendanceController");
+const {controlAttendance,getAttendance}=require("../controllers/attendanceController");
 router.post("/attendance",controlAttendance);
+router.get("/getattendance",getAttendance);
 const {getFeedback}=require("../controllers/feedbackController");
 router.post("/feedback",getFeedback);
 // const { 
