@@ -3,13 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import TeacherDashboard from "./components/TeacherDashboard";
 import StudentDashboard from "./components/StudentDashboard";
-import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import MarkAttendance from "./components/MarkAttendance";
 import StudentForm from "./components/StudentForm";
 import FeesStatus from "./components/FeesStatus";
 import UpdateAttendance from "./components/UpdateAttendance";
 import FeedbackForm from "./components/FeedbackForm";
+import ViewFeedback from './components/ViewFeedback';
 
 export default function App() {
   const [userType, setUserType] = useState(localStorage.getItem('userType'));
@@ -45,6 +45,7 @@ export default function App() {
             <Route path="/fees-status" element={
               userType === 'teacher' ? <FeesStatus /> : <Navigate to="/login" replace />
             } />
+            <Route path="/view-feedback" element={<ViewFeedback />} />
             
             {/* Student Routes */}
             <Route path="/studentDashboard" element={

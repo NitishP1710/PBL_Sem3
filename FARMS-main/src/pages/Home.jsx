@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Navbar from '../components/Navbar';
+import StudentNavbar from '../components/StudentNavbar';
 import AttendanceChart from '../components/AttendanceChart';
 import Card from '../components/Card';
-import SubjectList from '../components/SubjectList';
 import BacklogSubjects from '../components/BacklogSubjects';
 import EventsList from '../components/EventsList';
-import Footer from '../components/Footer';
-import StudentList from '../components/StudentList';
-import FeesStatus from '../components/FeesStatus';
 import { Users, Calendar, CreditCard, BookOpen, BarChart, User } from 'lucide-react';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -86,11 +82,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
-      <Navbar/>
+      <StudentNavbar/>
       <div className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Student List */}
-          <StudentList students={filteredStudents} />
 
           {/* Attendance Chart */}
           <div className="bg-white shadow-lg rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 col-span-full lg:col-span-2">
@@ -139,7 +133,6 @@ export default function Home() {
           </button> */}
 
           {/* Other Components */}
-          <SubjectList />
           <EventsList />
           <BacklogSubjects />
 

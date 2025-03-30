@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import TeacherNavbar from "./TeacherNavbar";
 
 export default function StudentForm() {
   const [studentData, setStudentData] = useState({
@@ -51,7 +52,8 @@ export default function StudentForm() {
     }));
   };
 
-  return (
+  return (<div>
+    <TeacherNavbar/>
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Student</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
@@ -171,5 +173,6 @@ export default function StudentForm() {
         </button>
       </form>
     </div>
+  </div>
   );
 }

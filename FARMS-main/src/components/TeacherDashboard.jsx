@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
-import Navbar from "./Navbar";
+import TeacherNavbar from "./TeacherNavbar";
 
 const TeacherDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -157,7 +157,7 @@ const TeacherDashboard = () => {
 
   return (
     <div>
-      <Navbar/>
+      <TeacherNavbar/>
     <div className="container mx-auto p-4 md:p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Teacher Dashboard</h1>

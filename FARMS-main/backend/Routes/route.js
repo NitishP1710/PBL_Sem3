@@ -1,59 +1,26 @@
 const express = require("express");
 const router = express.Router();
 
-// Import all controllers
+// Import controllers
+const { getStudents } = require("../controllers/studentController");
+const { 
+  controlAttendance,
+  getAttendance 
+} = require("../controllers/attendanceController");
+const { 
+  submitFeedback,
+  getFeedback 
+} = require("../controllers/feedbackController");
 
-const {getStudents}=require("../controllers/studentcontroller");
-router.get("/students",getStudents);
+// Student Routes
+router.get("/students", getStudents);
 
-const {controlAttendance,getAttendance}=require("../controllers/attendanceController");
-router.post("/attendance",controlAttendance);
-router.get("/getattendance",getAttendance);
-const {getFeedback}=require("../controllers/feedbackController");
-router.post("/feedback",getFeedback);
-// const { 
-//   createStudent,
-//   getStudents,
-//   updateStudent,
-//   deleteStudent 
-// } = require("../controllers/studentcontroller");
+// Attendance Routes
+router.post("/attendance", controlAttendance);
+router.get("/getattendance", getAttendance);
 
-// // const { 
-// //   controlAttendance,
-// //   getAttendance,
-// //   updateAttendance
-// // } = require("../controllers/attendanceController");
+// Feedback Routes
+router.post("/feedback", submitFeedback);  // Changed from getFeedback to submitFeedback
+router.get("/feedback", getFeedback);      // Added to retrieve feedback if needed
 
-// const {
-//   getFeedback,
-//   createFeedback,
-//   updateFeedback
-// } = require("../controllers/feedbackController");
-
-// // const {
-// //   getFees,
-// //   updateFees
-// // } = require("../controllers/feesController");
-
-// // Student Routes
-// router.post("/students", createStudent);
-// router.get("/students", getStudents);
-// //router.put("/students/:id", updateStudent);
-// //router.delete("/students/:id", deleteStudent);
-
-// // Attendance Routes
-// //router.post("/attendance", controlAttendance);
-// //router.get("/attendance", getAttendance);
-// //router.put("/attendance/:id", updateAttendance);
-
-// // Feedback Routes
-// router.get("/feedback", getFeedback);
-// router.post("/feedback", createFeedback);
-// router.put("/feedback/:id", updateFeedback);
-
-// // Fees Routes
-// //router.get("/fees", getFees);
-// //router.put("/fees/:id", updateFees);
-
-// module.exports = router;
 module.exports = router;

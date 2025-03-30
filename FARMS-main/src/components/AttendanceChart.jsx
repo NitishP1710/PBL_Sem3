@@ -2,7 +2,33 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-export default function AttendanceChart({ attendanceData }) {
+// Function to generate random attendance data
+const generateRandomAttendanceData = () => {
+  const subjects = [
+    "FDS", 
+    "CG", 
+    "DM", 
+    "OOP", 
+    "DELD"
+  ];
+  
+  return subjects.map(subject => {
+    const totalClasses = Math.floor(Math.random() * 30) + 10; // 10-40 classes
+    const presentClasses = Math.floor(Math.random() * totalClasses);
+    
+    return {
+      subject,
+      present: presentClasses,
+      total: totalClasses
+    };
+  });
+};
+
+export default function AttendanceChart() {
+  // Generate random data
+  const attendanceData = generateRandomAttendanceData();
+  
+  // Calculate percentages
   const attendancePercentages = attendanceData.map(item => 
     item.total === 0 ? 0 : Math.round((item.present / item.total) * 100)
   );
@@ -47,12 +73,34 @@ export default function AttendanceChart({ attendanceData }) {
       legend: {
         display: false,
       },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const data = attendanceData[context.dataIndex];
+            return [
+              `Present: ${data.present}/${data.total} classes`,
+              `Percentage: ${context.raw}%`
+            ];
+          }
+        }
+      }
     },
   };
 
   return (
-    <div className="h-96">
+    <div className="h-96 p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold mb-4 text-center">Random Attendance Chart</h2>
       <Bar data={barGraphData} options={barGraphOptions} />
+      <div className="mt-4 text-sm text-gray-600">
+        <p className="flex items-center">
+          <span className="inline-block w-3 h-3 bg-green-500 mr-2"></span>
+          ≥75% attendance (Good)
+        </p>
+        <p className="flex items-center">
+          <span className="inline-block w-3 h-3 bg-red-500 mr-2"></span>
+          &lt;75% attendance (Needs improvement)
+        </p>
+      </div>
     </div>
   );
 }
