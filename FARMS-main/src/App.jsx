@@ -25,8 +25,6 @@ export default function App() {
   return (
     <Router>
       <div className="min-h-screen flex flex-col">
-        {/* Navbar visibility control */}
-
         <main className="flex-1">
           <Routes>
             {/* Public Routes */}
@@ -45,7 +43,9 @@ export default function App() {
             <Route path="/fees-status" element={
               userType === 'teacher' ? <FeesStatus /> : <Navigate to="/login" replace />
             } />
-            <Route path="/view-feedback" element={<ViewFeedback />} />
+            <Route path="/view-feedback" element={
+              userType === 'teacher' ? <ViewFeedback /> : <Navigate to="/login" replace />
+            } />
             
             {/* Student Routes */}
             <Route path="/studentDashboard" element={
@@ -58,14 +58,8 @@ export default function App() {
               userType ? <FeedbackForm /> : <Navigate to="/login" replace />
             } />
             
-            {/* Default Route */}
-            <Route path="*" element={
-              userType ? (
-                <Navigate to={userType === 'teacher' ? '/teacherDashboard' : '/studentDashboard'} replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } />
+            {/* Default Route - Always redirect to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
 
