@@ -42,12 +42,12 @@ const UpdateAttendance = () => {
       ...prev,
       [name]: value,
     }));
-    setIsFetched(false); // Reset fetched status when inputs change
+    setIsFetched(false);
   };
 
   const formatDate = (date) => {
     if (!date) return "";
-    const formattedDate = new Date(date).toISOString().split("T")[0]; // Convert to yyyy-mm-dd format
+    const formattedDate = new Date(date).toISOString().split("T")[0]; 
     return formattedDate;
   };
 

@@ -11,7 +11,6 @@ const StudentProfile = () => {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch student profile
   const fetchStudent = async () => {
     try {
       const res = await axios.get(`http://localhost:5007/api/v1/teacher/students/${rollNumber}`);
@@ -27,7 +26,6 @@ const StudentProfile = () => {
     fetchStudent();
   }, [rollNumber]);
 
-  // Generate random results data
   const generateRandomResults = () => {
     const subjects = ["Mathematics", "Science", "English", "History", "Geography"];
     return subjects.map((subject) => ({
@@ -36,7 +34,6 @@ const StudentProfile = () => {
     }));
   };
 
-  // Generate random attendance data
   const generateRandomAttendance = () => {
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -50,7 +47,6 @@ const StudentProfile = () => {
     }));
   };
 
-  // Chart data for results
   const resultsChartData = {
     labels: generateRandomResults().map((result) => result.subject),
     datasets: [
@@ -62,7 +58,6 @@ const StudentProfile = () => {
     ],
   };
 
-  // Chart data for attendance
   const attendanceChartData = {
     labels: generateRandomAttendance().map((entry) => entry.date),
     datasets: [

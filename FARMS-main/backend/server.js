@@ -19,13 +19,11 @@ app.use(cors({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Database Connection (MongoDB)
 connectDatabase();
 app.use("/api/v1",route)
 
 // Initialize tables
 db.serialize(() => {
-  // Users table
   db.run(`
     CREATE TABLE IF NOT EXISTS user (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +34,6 @@ db.serialize(() => {
     )
   `);
   
-  // Feedback table
   db.run(`
     CREATE TABLE IF NOT EXISTS feedback (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,15 +47,12 @@ db.serialize(() => {
   
 });
 
-// ================ VULNERABLE AUTH ROUTES ================ //
 
-// Home end point
 app.get("/", (req, res) => {
   res.send("Server is running!");
 });
 
 const fetch = require("node-fetch");
-// SSRF vulnerable endpoint
 app.get("/ssrf-test", async (req, res) => {
 
   const { url } = req.query;
@@ -70,7 +64,6 @@ app.get("/ssrf-test", async (req, res) => {
   try {
     const targetUrl = new URL(url);
 
-    // Bypass restrictions for internal services
     if (targetUrl.hostname === "localhost" || targetUrl.hostname === "127.0.0.1") {
       console.log("Attempting localhost access:", url);
     }
@@ -106,7 +99,6 @@ app.post("/signup", (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  // Vulnerable SQL Query (concatenates user input directly)
   const checkQuery = `SELECT * FROM user WHERE username = '${username}'`;
 
   db.get(checkQuery, (err, row) => {
@@ -119,7 +111,6 @@ app.post("/signup", (req, res) => {
       return res.status(400).json({ error: "Username already exists" });
     }
 
-    // Vulnerable SQL Query (concatenates user input directly)
     const insertQuery = `INSERT INTO user (username, password, name, role) VALUES ('${username}', '${password}', '${name}', '${role}')`;
 
     db.run(insertQuery, function (err) {
@@ -143,7 +134,6 @@ app.post("/login", (req, res) => {
     return res.status(400).json({ error: "Username and password are required" });
   }
 
-  // Vulnerable SQL Query (concatenates user input directly)
   const query = `SELECT * FROM user WHERE username = '${username}' AND password = '${password}'`;
 
   db.get(query, (err, row) => {
@@ -168,9 +158,8 @@ app.post("/login", (req, res) => {
   });
 });
 
-// ================ VULNERABLE STUDENT ROUTES ================ //
 
-// Get all students (vulnerable to SQL injection)
+// Get all students 
 app.get("/api/v1/students", (req, res) => {
   const query = `SELECT * FROM students`;
   db.all(query, (err, rows) => {
@@ -182,7 +171,7 @@ app.get("/api/v1/students", (req, res) => {
   });
 });
 
-// Create student (vulnerable to SQL injection)
+// Create student
 app.post("/api/v1/students", (req, res) => {
   const { rollNumber, name, email, className, division, address, phone } = req.body;
 
@@ -190,7 +179,6 @@ app.post("/api/v1/students", (req, res) => {
     return res.status(400).json({ error: "Roll number and name are required" });
   }
 
-  // Vulnerable SQL query
   const query = `INSERT INTO students (rollNumber, name, email, className, division, address, phone) 
                  VALUES ('${rollNumber}', '${name}', '${email || ''}', '${className || ''}', 
                  '${division || ''}', '${address || ''}', '${phone || ''}')`;
@@ -208,9 +196,8 @@ app.post("/api/v1/students", (req, res) => {
   });
 });
 
-// ================ VULNERABLE ATTENDANCE ROUTES ================ //
 
-// Mark attendance (vulnerable to SQL injection)
+// Mark attendance 
 app.post("/api/v1/attendance", (req, res) => {
   const { student_id, date, status } = req.body;
 
@@ -218,7 +205,6 @@ app.post("/api/v1/attendance", (req, res) => {
     return res.status(400).json({ error: "Student ID, date and status are required" });
   }
 
-  // Vulnerable SQL query
   const query = `INSERT INTO attendance (student_id, date, status) 
                  VALUES ('${student_id}', '${date}', '${status}')`;
 
@@ -235,9 +221,8 @@ app.post("/api/v1/attendance", (req, res) => {
   });
 });
 
-// Get attendance (vulnerable to SQL injection)
+// Get attendance 
 app.get("/api/v1/attendance", (req, res) => {
-  // Vulnerable to SQL injection through query params
   const student_id = req.query.student_id;
   let query = `SELECT * FROM attendance`;
   
@@ -254,9 +239,8 @@ app.get("/api/v1/attendance", (req, res) => {
   });
 });
 
-// ================ VULNERABLE FEEDBACK ROUTES ================ //
 
-// Submit feedback (vulnerable to SQL injection)
+// Submit feedback
 app.post("/api/v1/feedback", (req, res) => {
   const { name, email, feedback, student_id } = req.body;
 
@@ -264,7 +248,6 @@ app.post("/api/v1/feedback", (req, res) => {
     return res.status(400).json({ error: "Name and feedback are required" });
   }
 
-  // Vulnerable SQL query
   const query = `INSERT INTO feedback (name, email, feedback, student_id) 
                  VALUES ('${name}', '${email || ''}', '${feedback}', '${student_id || 'NULL'}')`;
 
@@ -281,7 +264,7 @@ app.post("/api/v1/feedback", (req, res) => {
   });
 });
 
-// Get all feedback (vulnerable to SQL injection)
+// Get all feedback
 app.get("/api/v1/feedback", (req, res) => {
   const query = `SELECT * FROM feedback`;
   db.all(query, (err, rows) => {
@@ -293,11 +276,9 @@ app.get("/api/v1/feedback", (req, res) => {
   });
 });
 
-// ================ STATIC/HARDCODED ROUTES ================ //
 
-// Get fees status (hardcoded)
+// Get fees status 
 app.get("/api/v1/fees", (req, res) => {
-  // Hardcoded fee data
   const feesData = [
     { id: 1, student_id: 1, amount: 5000, paid: true, due_date: "2023-12-31" },
     { id: 2, student_id: 2, amount: 5000, paid: false, due_date: "2023-12-31" }
@@ -306,9 +287,8 @@ app.get("/api/v1/fees", (req, res) => {
   res.json({ success: true, data: feesData });
 });
 
-// Get class schedule (hardcoded)
+// Get class schedule 
 app.get("/api/v1/schedule", (req, res) => {
-  // Hardcoded schedule data
   const scheduleData = [
     { day: "Monday", subject: "Math", time: "09:00-10:00" },
     { day: "Tuesday", subject: "Science", time: "10:00-11:00" }

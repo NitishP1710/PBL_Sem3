@@ -2,7 +2,6 @@ import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Function to generate random attendance data
 const generateRandomAttendanceData = () => {
   const subjects = [
     "FDS", 
@@ -25,10 +24,8 @@ const generateRandomAttendanceData = () => {
 };
 
 export default function AttendanceChart() {
-  // Generate random data
   const attendanceData = generateRandomAttendanceData();
   
-  // Calculate percentages
   const attendancePercentages = attendanceData.map(item => 
     item.total === 0 ? 0 : Math.round((item.present / item.total) * 100)
   );
